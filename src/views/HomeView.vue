@@ -127,7 +127,12 @@
             <PointTable ref="pointTable" />
           </div>
           <div>
-            <div class="table-title">所有周期</div>
+            <div class="table-title">
+              所有周期&nbsp;&nbsp;<eye-outlined @click="showDetail = !showDetail" style="cursor: pointer" />
+            </div>
+            <div class="detail" v-show="showDetail">
+              <div v-for="(value, key, index) in details" :key="index">{{ key }}:<br />{{ value }}<br /><br /></div>
+            </div>
             <ResultTable ref="resultTable" />
           </div>
         </template>
@@ -147,7 +152,7 @@ import { excelData } from '@/stores/excelDataStore'
 import { watch, getCurrentInstance, ref, computed } from 'vue'
 import type { LineData } from '@/types/type'
 import LineChartDrawer from '@/helper/LineChartDrawer'
-import { DownloadOutlined } from '@ant-design/icons-vue'
+import { DownloadOutlined, EyeOutlined } from '@ant-design/icons-vue'
 import { calcResult } from '@/helper/calc'
 
 let echarts = getCurrentInstance()!.appContext.config.globalProperties.$echarts
@@ -162,6 +167,9 @@ const bpm15 = ref()
 const bpm20 = ref()
 
 const showResult = ref(false)
+const showDetail = ref(false)
+
+const details = ref<any>({})
 
 const bpm10From = ref(60)
 const bpm15From = ref('')
@@ -266,6 +274,8 @@ function calc() {
   setTimeout(() => {
     resultTable.value.data = [bmp10Result.result, bmp15Result.result, bmp20Result.result]
     pointTable.value.data = [bmp10Result.point, bmp15Result.point, bmp20Result.point]
+
+    details.value = { ...bmp10Result.detail, ...bmp15Result.detail, ...bmp20Result.detail }
   })
 }
 
@@ -309,5 +319,13 @@ function download() {
   font-size: 13px;
   margin-bottom: 5px;
   color: rgba(0, 0, 0, 0.45);
+}
+
+.detail {
+  background: rgb(245, 245, 245);
+  padding: 10px;
+  max-height: 300px;
+  overflow: auto;
+  margin: 10px 0px;
 }
 </style>

@@ -25,7 +25,6 @@ const isHide = ref(true)
 const point1 = ref('')
 const point2 = ref('')
 const point3 = ref('')
-const point4 = ref('')
 
 const pointsNum = computed(() => {
   if (point3.value) {

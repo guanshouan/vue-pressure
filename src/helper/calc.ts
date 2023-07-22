@@ -26,17 +26,23 @@ export function calcResult(
 
   // 正偏差arr
   let inPosArr = inCycleDataArr.map((x) => getPos(x, inStandard))
+  console.log(`-------${id}吸气相正偏差结果集-------`, inPosArr)
   // 负偏差arr
   let inNegArr = inCycleDataArr.map((x) => getNeg(x, inStandard))
+  console.log(`-------${id}吸气相负偏差结果集-------`, inNegArr)
   // 偏差arr
   let inMaxArr = inCycleDataArr.map((x) => getMax(x, inStandard))
+  console.log(`-------${id}吸气相偏差结果集-------`, inMaxArr)
 
   // 正偏差arr
   let outPosArr = outCycleDataArr.map((x) => getPos(x, outStandard))
+  console.log(`-------${id}呼气相正偏差结果集-------`, outPosArr)
   // 负偏差arr
   let outNegArr = outCycleDataArr.map((x) => getNeg(x, outStandard))
+  console.log(`-------${id}呼气相负偏差结果集-------`, outNegArr)
   // 偏差arr
   let outMaxArr = outCycleDataArr.map((x) => getMax(x, outStandard))
+  console.log(`-------${id}呼气相偏差结果集-------`, outMaxArr)
 
   let inPosAvg = calcAvg(inPosArr)
   let inPosSd = calcSd(inPosArr)
@@ -77,7 +83,18 @@ export function calcResult(
     outMaxSd
   }
 
-  return { point, result }
+  return {
+    point,
+    result,
+    detail: {
+      [`${id}吸气相正偏差结果集`]: inPosArr,
+      [`${id}吸气相负偏差结果集`]: inNegArr,
+      [`${id}吸气相偏差结果集`]: inMaxArr,
+      [`${id}呼气相正偏差结果集`]: outPosArr,
+      [`${id}呼气相负偏差结果集`]: outNegArr,
+      [`${id}呼气相偏差结果集`]: outMaxArr
+    }
+  }
 }
 
 export function calcPoint() {}
