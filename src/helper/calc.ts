@@ -98,12 +98,7 @@ export function calcResult(
   }
 }
 
-export function calcPoint() {}
-
-/**
- * 获取周期数据
- *  data: [[x, y], ...]
- */
+// 获取周期数据  data: [[x, y], ...]
 export function getCycleDataArr(offset: number, data: any[], points: any[]) {
   const cycleDataArr = []
   let pointData: any // ponits对应周期的数据，用于后续单独显示值
