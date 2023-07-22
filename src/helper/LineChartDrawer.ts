@@ -28,7 +28,7 @@ class LineChartDrawer {
       toolbox: {
         feature: {
           dataZoom: {
-            yAxisIndex: 'none'
+            show: false
           },
           restore: {},
           saveAsImage: {}

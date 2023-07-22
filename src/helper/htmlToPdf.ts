@@ -1,12 +1,13 @@
 // 导出页面为PDF格式
 import html2Canvas from 'html2canvas'
 import JsPDF from 'jspdf'
+
 export default {
   install(app: any) {
     app.config.globalProperties.$getPdf = function (el: any, title = 'test') {
       html2Canvas(el, {
         // html2Canvas(document.querySelector('#pdfDom'), { //这是在界面上设置一个id
-        //只下载id为pdfDom的内容
+        // 只下载id为pdfDom的内容
         // html2Canvas(document.body, { //body是下载整个界面
         useCORS: true, //是否尝试使用CORS从服务器加载图像
         allowTaint: true,
@@ -30,7 +31,7 @@ export default {
         const pageData = canvas.toDataURL('image/jpeg', 1.0)
         const PDF = new JsPDF('' as any, 'pt', 'a4')
         // 有两个高度需要区分，一个是html页面的实际高度，和生成pdf的页面高度(841.89)
-        //当内容未超过pdf一页显示的范围，无需分页
+        // 当内容未超过pdf一页显示的范围，无需分页
         if (leftHeight < pageHeight) {
           PDF.addImage(pageData, 'JPEG', 0, 0, imgWidth, imgHeight)
         } else {

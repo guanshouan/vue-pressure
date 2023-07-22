@@ -109,7 +109,7 @@
         </div>
         <div class="flex mb20">
           <span class="input-title">备注:</span>
-          <a-textarea style="width: 842px" v-model:value="remark" />
+          <a-textarea style="width: 808px" v-model:value="remark" />
         </div>
         <a-button class="mb20" type="primary" @click="calc">计算</a-button>
       </div>
@@ -117,8 +117,19 @@
       <div class="result-box">
         <template v-if="showResult">
           <div class="split-line"></div>
-          <h3>计算结果</h3>
-          <ResultTable />
+          <h3>
+            计算结果&nbsp;(单位：
+            <span v-if="pressureUnit === PressureUnit.cmH2O">cmH<sub>2</sub>O</span>
+            <span v-if="pressureUnit === PressureUnit.hPa">hPa</span>)
+          </h3>
+          <div class="mb30">
+            <div class="table-title">选中周期</div>
+            <PointTable ref="pointTable" />
+          </div>
+          <div>
+            <div class="table-title">所有周期</div>
+            <ResultTable ref="resultTable" />
+          </div>
         </template>
       </div>
     </div>
@@ -129,19 +140,22 @@
 import UploadExcel from '@/components/UploadExcel.vue'
 import LineChartBox from '@/components/LineChartBox.vue'
 import ResultTable from '@/components/ResultTable.vue'
+import PointTable from '@/components/PointTable.vue'
 import { uploadType } from '@/stores/commonStore'
 import { PressureUnit, UploadType } from '@/types/enum'
 import { excelData } from '@/stores/excelDataStore'
-import { watch, getCurrentInstance, ref } from 'vue'
+import { watch, getCurrentInstance, ref, computed } from 'vue'
 import type { LineData } from '@/types/type'
 import LineChartDrawer from '@/helper/LineChartDrawer'
 import { DownloadOutlined } from '@ant-design/icons-vue'
-import { calcAvg, getCycleData, getPos } from '@/helper/calc'
+import { calcResult } from '@/helper/calc'
 
 let echarts = getCurrentInstance()!.appContext.config.globalProperties.$echarts
 let getPdf = getCurrentInstance()!.appContext.config.globalProperties.$getPdf
 
 const printDiv = ref()
+const resultTable = ref()
+const pointTable = ref()
 
 const bpm10 = ref()
 const bpm15 = ref()
@@ -149,10 +163,15 @@ const bpm20 = ref()
 
 const showResult = ref(false)
 
-const bpm10From = ref('')
+const bpm10From = ref(60)
 const bpm15From = ref('')
 const bpm20From = ref('')
+
 const sampleRate = ref(128)
+
+const allPointNum = computed(() => {
+  return Number(sampleRate.value) * 60 * 5
+})
 
 const pressureUnit = ref(PressureUnit.cmH2O)
 
@@ -168,76 +187,86 @@ const remark = ref('')
 function draw() {
   showResult.value = false
 
-  let allPointNum = Number(sampleRate.value) * 60 * 5
-
   bpm10.value.isHide = false
   let bpm10PointsPerCycle = (60 / 10) * Number(sampleRate.value)
   let bpm10Offset = Number(bpm10From.value) * Number(sampleRate.value)
   setTimeout(() => {
-    LineChartDrawer.draw(
-      echarts,
-      excelData.value[0]
-        ?.map((data: LineData) => {
-          return [data.x, data.y]
-        })
-        .slice(bpm10Offset, bpm10Offset + allPointNum),
-      'bpm10',
-      { title: '10bpmddddddddddddddddddddssssssssssssssss' }
-    )
+    LineChartDrawer.draw(echarts, transformData(excelData.value[0]!, bpm10Offset), 'bpm10', {
+      title: `10bpm (每周期采样点：${bpm10PointsPerCycle})`
+    })
   })
 
   bpm15.value.isHide = false
   let bpm15PointsPerCycle = (60 / 15) * Number(sampleRate.value)
   let bpm15Offset = Number(bpm15From.value) * Number(sampleRate.value)
   setTimeout(() => {
-    LineChartDrawer.draw(
-      echarts,
-      excelData.value[0]
-        ?.map((data: LineData) => {
-          return [data.x, data.y]
-        })
-        .slice(bpm15Offset, bpm15Offset + bpm15PointsPerCycle * 10),
-      'bpm15',
-      { title: '15bpm' }
-    )
+    LineChartDrawer.draw(echarts, transformData(excelData.value[0]!, bpm15Offset), 'bpm15', {
+      title: `15bpm (每周期采样点：${bpm15PointsPerCycle})`
+    })
   })
 
   bpm20.value.isHide = false
   let bpm20PointsPerCycle = (60 / 20) * Number(sampleRate.value)
   let bpm20Offset = Number(bpm20From.value) * Number(sampleRate.value)
   setTimeout(() => {
-    LineChartDrawer.draw(
-      echarts,
-      excelData.value[0]
-        ?.map((data: LineData) => {
-          return [data.x, data.y]
-        })
-        .slice(bpm20Offset, bpm20Offset + bpm20PointsPerCycle * 10),
-      'bpm20',
-      { title: '20bpm' }
-    )
+    LineChartDrawer.draw(echarts, transformData(excelData.value[0]!, bpm20Offset), 'bpm20', {
+      title: `20bpm (每周期采样点：${bpm20PointsPerCycle})`
+    })
   })
+}
+
+function transformData(excelData: LineData[], offset: number) {
+  return excelData.map((data) => [data.x, data.y]).slice(offset, offset + allPointNum.value)
 }
 
 function calc() {
   showResult.value = true
 
   let bpm10Offset = Number(bpm10From.value) * Number(sampleRate.value)
-  const inPosAvg = calcAvg(
-    getCycleData(
-      bpm10Offset,
-      excelData.value[0]
-        ?.map((data: LineData) => {
-          return [data.x, data.y]
-        })
-        .slice(bpm10Offset, bpm10Offset + 5 * 60 * Number(sampleRate.value)),
-      bpm10.value.generate(),
-      Number(inBeginPercent.value),
-      Number(inEndPercent.value)
-    ).map((x) => getPos(x, Number(inStandard.value)))
+  let bpm15Offset = Number(bpm15From.value) * Number(sampleRate.value)
+  let bpm20Offset = Number(bpm20From.value) * Number(sampleRate.value)
+
+  let bmp10Result = calcResult(
+    'bpm10',
+    bpm10Offset,
+    transformData(excelData.value[0]!, bpm10Offset),
+    bpm10.value.generate(),
+    Number(inBeginPercent.value),
+    Number(inEndPercent.value),
+    Number(inStandard.value),
+    Number(outBeginPercent.value),
+    Number(outEndPercent.value),
+    Number(outStandard.value)
+  )
+  let bmp15Result = calcResult(
+    'bpm15',
+    bpm15Offset,
+    transformData(excelData.value[0]!, bpm15Offset),
+    bpm15.value.generate(),
+    Number(inBeginPercent.value),
+    Number(inEndPercent.value),
+    Number(inStandard.value),
+    Number(outBeginPercent.value),
+    Number(outEndPercent.value),
+    Number(outStandard.value)
+  )
+  let bmp20Result = calcResult(
+    'bpm20',
+    bpm20Offset,
+    transformData(excelData.value[0]!, bpm20Offset),
+    bpm20.value.generate(),
+    Number(inBeginPercent.value),
+    Number(inEndPercent.value),
+    Number(inStandard.value),
+    Number(outBeginPercent.value),
+    Number(outEndPercent.value),
+    Number(outStandard.value)
   )
 
-  console.log(inPosAvg)
+  setTimeout(() => {
+    resultTable.value.data = [bmp10Result.result, bmp15Result.result, bmp20Result.result]
+    pointTable.value.data = [bmp10Result.point, bmp15Result.point, bmp20Result.point]
+  })
 }
 
 function download() {
@@ -264,6 +293,7 @@ function download() {
 
 .result-box {
   min-height: 200px;
+  padding-bottom: 50px;
 }
 
 .export-icon {
@@ -273,5 +303,11 @@ function download() {
   right: 25px;
   font-size: 24px;
   color: #1677ff;
+}
+
+.table-title {
+  font-size: 13px;
+  margin-bottom: 5px;
+  color: rgba(0, 0, 0, 0.45);
 }
 </style>

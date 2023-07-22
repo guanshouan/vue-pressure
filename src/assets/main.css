@@ -37,12 +37,20 @@ body {
     margin-bottom: 20px;
 }
 
-.short-input {
-    width: 120px;
+.mb30 {
+    margin-bottom: 30px;
 }
 
 .input {
     width: 180px;
+}
+
+.short-input {
+    width: 120px;
+}
+
+.mini-input {
+    width: 100px;
 }
 
 .input-title {
