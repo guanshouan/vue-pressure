@@ -229,6 +229,7 @@ function transformData(excelData: LineData[], offset: number) {
 
 function calc() {
   showResult.value = true
+  showDetail.value = false
 
   let bpm10Offset = Number(bpm10From.value) * Number(sampleRate.value)
   let bpm15Offset = Number(bpm15From.value) * Number(sampleRate.value)

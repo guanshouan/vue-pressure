@@ -87,6 +87,7 @@ export function calcResult(
     point,
     result,
     detail: {
+      [`${id} 选点index`]: pointIndex,
       [`${id}吸气相正偏差结果集`]: inPosArr,
       [`${id}吸气相负偏差结果集`]: inNegArr,
       [`${id}吸气相偏差结果集`]: inMaxArr,
