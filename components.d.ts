@@ -20,7 +20,6 @@ declare module 'vue' {
     AUpload: typeof import('ant-design-vue/es')['Upload']
     LineChartBox: typeof import('./src/components/LineChartBox.vue')['default']
     PointTable: typeof import('./src/components/PointTable.vue')['default']
-    ResultDetail: typeof import('./src/components/ResultDetail.vue')['default']
     ResultTable: typeof import('./src/components/ResultTable.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
