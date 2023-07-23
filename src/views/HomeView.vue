@@ -376,8 +376,12 @@ function checkBasic() {
     message.warn('请先上传文件')
     return false
   }
+  if (!sampleRate.value) {
+    message.warn('请先填写绘图信息')
+    return false
+  }
   if (uploadType.value === UploadType.Single) {
-    if (!bpm10From.value || !bpm15From.value || !bpm20From.value || !sampleRate.value) {
+    if (!bpm10From.value || !bpm15From.value || !bpm20From.value) {
       message.warn('请先填写绘图信息')
       return false
     }
@@ -398,15 +402,27 @@ function checkChart() {
     message.warn('请先完成绘图')
     return false
   }
+
   if (!(checkPoint(chart1) && checkPoint(chart2) && checkPoint(chart3))) {
-    message.warn('请先在图中取标准点')
     return false
   }
   return true
 }
 
 function checkPoint(chart: any) {
-  return chart.value.isHide || chart.value.generate().length > 0
+  if (chart.value.isHide) {
+    return true
+  }
+  let points = chart.value.generate()
+  if (points.length === 0) {
+    message.warn('请先选取计算点')
+    return false
+  }
+  if (!(Number(points[1][0]) > Number(points[0][0]) && Number(points[2][0]) > Number(points[1][0]))) {
+    message.warn('请重新选取计算点')
+    return false
+  }
+  return true
 }
 
 function checkParam() {
@@ -465,9 +481,10 @@ function checkParam() {
 .export-icon {
   cursor: pointer;
   position: fixed;
-  top: 20px;
-  right: 25px;
-  font-size: 24px;
+  top: 28px;
+  right: 26px;
+  font-size: 25px;
   color: #1677ff;
+  z-index: 999;
 }
 </style>
