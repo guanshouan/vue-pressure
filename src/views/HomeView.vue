@@ -49,7 +49,7 @@
                 <a-select-option :value="15">15</a-select-option>
                 <a-select-option :value="20">20</a-select-option>
               </a-select>
-              <span class="mr20">bmp</span>
+              <span class="mr20">bpm</span>
             </span>
             <span>
               <span class="input-title">from:</span>
@@ -142,7 +142,7 @@
               所有周期&nbsp;&nbsp;<eye-outlined @click="showDetail = !showDetail" style="cursor: pointer" />
             </div>
             <div class="detail" v-show="showDetail">
-              <div v-for="(value, key, index) in details" :key="index">{{ key }}:<br />{{ value }}<br /><br /></div>
+              <div v-for="(value, key, index) in details" :key="index">{{ key }}：<br />{{ value }}<br /><br /></div>
             </div>
             <ResultTable ref="resultTable" />
           </div>
@@ -161,7 +161,7 @@ import { uploadType } from '@/stores/commonStore'
 import { PressureUnit, UploadType } from '@/types/enum'
 import { excels } from '@/stores/excelDataStore'
 import { getCurrentInstance, ref, computed, watch } from 'vue'
-import type { LineData } from '@/types/type'
+import type { ExcelData, LineData } from '@/types/type'
 import LineChartDrawer from '@/helper/LineChartDrawer'
 import { DownloadOutlined, EyeOutlined } from '@ant-design/icons-vue'
 import { calcResult } from '@/helper/calc'
@@ -187,12 +187,12 @@ const bpm10From = ref('')
 const bpm15From = ref('')
 const bpm20From = ref('')
 
-type DrawInfo = {
-  fileName: string
+type Info = {
+  name: string
   bpm: '10' | '15' | '20'
   from: string
 }
-const multiInfo = ref<{ [propName: string]: DrawInfo }>({})
+const multiInfo = ref<{ [propName: string]: Info }>({})
 
 watch(
   [excels, uploadType],
@@ -201,7 +201,7 @@ watch(
       excels.value.forEach((excel) => {
         if (!multiInfo.value[excel.fileId]) {
           multiInfo.value[excel.fileId] = {
-            fileName: excel.fileName,
+            name: excel.fileName,
             bpm: '10',
             from: ''
           }
@@ -225,6 +225,9 @@ const sampleRate = ref(128)
 const allPointNum = computed(() => {
   return Number(sampleRate.value) * 60 * 5
 })
+const isSingle = computed(() => {
+  return uploadType.value === UploadType.Single
+})
 
 const pressureUnit = ref(PressureUnit.cmH2O)
 
@@ -243,33 +246,36 @@ function draw() {
   }
   showResult.value = false
   const rate = Number(sampleRate.value)
-  const isSingle = uploadType.value === UploadType.Single
 
-  chart1.value.isHide = false
-  let excel = excels.value[0]
-  let chart1bmp = isSingle ? 10 : Number(multiInfo.value[excel.fileId]!.bpm)
-  let chart1From = isSingle ? Number(bpm10From.value) : Number(multiInfo.value[excel.fileId]!.from)
-  let chart1Title = isSingle ? '10bmp' : multiInfo.value[excel.fileId]!.fileName
-  let chart1PointsPerCycle = (60 / chart1bmp) * rate
-  let chart1Offset = chart1From * rate
-  setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, chart1Offset), 'chart1', {
-      title: `${chart1Title} (每周期采样点：${chart1PointsPerCycle})`
+  if (excels.value.length > 0) {
+    chart1.value.isHide = false
+    let excel = excels.value[0]
+    let chart1bmp = isSingle.value ? 10 : Number(multiInfo.value[excel.fileId]!.bpm)
+    let chart1From = isSingle.value ? Number(bpm10From.value) : Number(multiInfo.value[excel.fileId]!.from)
+    let chart1Title = isSingle.value ? '10bmp' : multiInfo.value[excel.fileId]!.name
+    let chart1PointsPerCycle = (60 / chart1bmp) * rate
+    let chart1Offset = chart1From * rate
+    setTimeout(() => {
+      LineChartDrawer.draw(echarts, transformData(excels.value[0].data, chart1Offset), 'chart1', {
+        title: `${chart1Title} (每周期理论采样点：${chart1PointsPerCycle})`
+      })
+      chart1.value.reset()
     })
-  })
+  }
 
   if (uploadType.value === UploadType.Single || excels.value.length > 1) {
     chart2.value.isHide = false
-    let excel = isSingle ? excels.value[0] : excels.value[1]
-    let chart2bmp = isSingle ? 15 : Number(multiInfo.value[excel.fileId]!.bpm)
-    let chart2From = isSingle ? Number(bpm15From.value) : Number(multiInfo.value[excel.fileId]!.from)
-    let chart2Title = isSingle ? '15bmp' : multiInfo.value[excel.fileId]!.fileName
+    let excel = isSingle.value ? excels.value[0] : excels.value[1]
+    let chart2bmp = isSingle.value ? 15 : Number(multiInfo.value[excel.fileId]!.bpm)
+    let chart2From = isSingle.value ? Number(bpm15From.value) : Number(multiInfo.value[excel.fileId]!.from)
+    let chart2Title = isSingle.value ? '15bmp' : multiInfo.value[excel.fileId]!.name
     let chart2PointsPerCycle = (60 / chart2bmp) * rate
     let chart2Offset = chart2From * rate
     setTimeout(() => {
       LineChartDrawer.draw(echarts, transformData(excel.data, chart2Offset), 'chart2', {
-        title: `${chart2Title} (每周期采样点：${chart2PointsPerCycle})`
+        title: `${chart2Title} (每周期理论采样点：${chart2PointsPerCycle})`
       })
+      chart2.value.reset()
     })
   } else {
     chart2.value.isHide = true
@@ -277,16 +283,17 @@ function draw() {
 
   if (uploadType.value === UploadType.Single || excels.value.length > 2) {
     chart3.value.isHide = false
-    let excel = isSingle ? excels.value[0] : excels.value[2]
-    let chart3bmp = isSingle ? 20 : Number(multiInfo.value[excel.fileId]!.bpm)
-    let chart3From = isSingle ? Number(bpm20From.value) : Number(multiInfo.value[excel.fileId]!.from)
-    let chart3Title = isSingle ? '20bmp' : multiInfo.value[excel.fileId]!.fileName
+    let excel = isSingle.value ? excels.value[0] : excels.value[2]
+    let chart3bmp = isSingle.value ? 20 : Number(multiInfo.value[excel.fileId]!.bpm)
+    let chart3From = isSingle.value ? Number(bpm20From.value) : Number(multiInfo.value[excel.fileId]!.from)
+    let chart3Title = isSingle.value ? '20bmp' : multiInfo.value[excel.fileId]!.name
     let chart3PointsPerCycle = (60 / chart3bmp) * rate
     let chart3Offset = chart3From * rate
     setTimeout(() => {
       LineChartDrawer.draw(echarts, transformData(excel.data, chart3Offset), 'chart3', {
-        title: `${chart3Title} (每周期采样点：${chart3PointsPerCycle})`
+        title: `${chart3Title} (每周期理论采样点：${chart3PointsPerCycle})`
       })
+      chart3.value.reset()
     })
   } else {
     chart3.value.isHide = true
@@ -305,53 +312,53 @@ function calc() {
   showResult.value = true
   showDetail.value = false
 
-  let bpm10Offset = Number(bpm10From.value) * Number(sampleRate.value)
-  let bpm15Offset = Number(bpm15From.value) * Number(sampleRate.value)
-  let bpm20Offset = Number(bpm20From.value) * Number(sampleRate.value)
+  let chart1Result = calcAdapter(excels.value[0], chart1, { bpm: '10', from: bpm10From.value, name: 'bpm10' })
 
-  let bmp10Result = calcResult(
-    'bpm10',
-    bpm10Offset,
-    transformData(excels.value[0].data, bpm10Offset),
-    chart1.value.generate(),
-    Number(inBeginPercent.value),
-    Number(inEndPercent.value),
-    Number(inStandard.value),
-    Number(outBeginPercent.value),
-    Number(outEndPercent.value),
-    Number(outStandard.value)
-  )
-  let bmp15Result = calcResult(
-    'bpm15',
-    bpm15Offset,
-    transformData(excels.value[0].data, bpm15Offset),
-    chart2.value.generate(),
-    Number(inBeginPercent.value),
-    Number(inEndPercent.value),
-    Number(inStandard.value),
-    Number(outBeginPercent.value),
-    Number(outEndPercent.value),
-    Number(outStandard.value)
-  )
-  let bmp20Result = calcResult(
-    'bpm20',
-    bpm20Offset,
-    transformData(excels.value[0].data, bpm20Offset),
-    chart3.value.generate(),
-    Number(inBeginPercent.value),
-    Number(inEndPercent.value),
-    Number(inStandard.value),
-    Number(outBeginPercent.value),
-    Number(outEndPercent.value),
-    Number(outStandard.value)
-  )
+  let chart2Result: any
+  if (!chart2.value.isHide) {
+    chart2Result = calcAdapter(isSingle.value ? excels.value[0] : excels.value[1], chart2, {
+      bpm: '15',
+      from: bpm15From.value,
+      name: 'bpm15'
+    })
+  }
+
+  let chart3Result: any
+  if (!chart3.value.isHide) {
+    chart3Result = calcAdapter(isSingle.value ? excels.value[0] : excels.value[2], chart3, {
+      bpm: '20',
+      from: bpm20From.value,
+      name: 'bpm20'
+    })
+  }
 
   setTimeout(() => {
-    resultTable.value.data = [bmp10Result.result, bmp15Result.result, bmp20Result.result]
-    pointTable.value.data = [bmp10Result.point, bmp15Result.point, bmp20Result.point]
+    resultTable.value.data = [chart1Result.result, chart2Result?.result, chart3Result?.result].filter(Boolean)
+    pointTable.value.data = [chart1Result.point, chart2Result?.point, chart3Result?.point].filter(Boolean)
 
-    details.value = { ...bmp10Result.detail, ...bmp15Result.detail, ...bmp20Result.detail }
+    details.value = { ...chart1Result.detail, ...chart2Result?.detail, ...chart3Result?.detail }
   })
+}
+
+function calcAdapter(excel: ExcelData, chart: any, singleParam: Info) {
+  const rate = Number(sampleRate.value)
+
+  let from = isSingle.value ? Number(singleParam.from) : Number(multiInfo.value[excel.fileId]!.from)
+  let title = isSingle.value ? '20bpm' : multiInfo.value[excel.fileId]!.name
+  let offset = from * rate
+
+  return calcResult(
+    title,
+    offset,
+    transformData(excel.data, offset),
+    chart.value.generate(),
+    Number(inBeginPercent.value),
+    Number(inEndPercent.value),
+    Number(inStandard.value),
+    Number(outBeginPercent.value),
+    Number(outEndPercent.value),
+    Number(outStandard.value)
+  )
 }
 
 function download() {
@@ -393,7 +400,7 @@ function checkChart() {
 }
 
 function checkPoint(chart: any) {
-  return chart1.value.isHide || chart.value.generate().length
+  return chart.value.isHide || chart.value.generate().length > 0
 }
 
 function checkParam() {

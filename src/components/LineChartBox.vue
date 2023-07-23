@@ -85,7 +85,7 @@ function generate() {
   return [process(point1.value), process(point2.value), process(point3.value)]
 }
 
-defineExpose({ isHide, generate })
+defineExpose({ isHide, generate, reset })
 </script>
 
 <style scoped></style>
