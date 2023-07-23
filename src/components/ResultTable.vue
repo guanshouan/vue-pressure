@@ -1,8 +1,8 @@
 <template>
-  <a-table :data-source="data" :pagination="false">
+  <a-table :data-source="data" :pagination="false" bordered>
     <a-table-column key="id" title="bpm" data-index="id" />
     <a-table-column-group>
-      <template #title>平均值</template>
+      <template #title>最大偏差平均值</template>
       <a-table-column key="inPosAvg" title="吸气相正偏差" data-index="inPosAvg" />
       <a-table-column key="inNegAvg" title="吸气相负偏差" data-index="inNegAvg" />
       <a-table-column key="inMaxAvg" title="吸气相偏差" data-index="inMaxAvg" />
@@ -11,7 +11,7 @@
       <a-table-column key="outMaxAvg" title="呼气相偏差" data-index="outMaxAvg" />
     </a-table-column-group>
     <a-table-column-group>
-      <template #title>标准差</template>
+      <template #title>最大偏差标准差</template>
       <a-table-column key="inPosSd" title="吸气相正偏差" data-index="inPosSd" />
       <a-table-column key="inNegSd" title="吸气相负偏差" data-index="inNegSd" />
       <a-table-column key="inMaxSd" title="吸气相偏差" data-index="inMaxSd" />

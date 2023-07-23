@@ -33,7 +33,7 @@
           </span>
           <span>
             <span class="input-title">压力单位:</span>
-            <a-select ref="select" v-model:value="pressureUnit" style="width: 90px" class="mr20">
+            <a-select v-model:value="pressureUnit" style="width: 90px" class="mr20">
               <a-select-option :value="PressureUnit.cmH2O">cmH<sub>2</sub>O</a-select-option>
               <a-select-option :value="PressureUnit.hPa">hPa</a-select-option>
             </a-select>
@@ -44,7 +44,11 @@
             <span class="label ellipsis mr10" :title="excel.fileName" style="width: 120px">{{ excel.fileName }}</span>
             <span>
               <span class="input-title">呼吸频率:</span>
-              <a-input class="short-input mr5" />
+              <a-select style="width: 80px" class="mr5">
+                <a-select-option :value="10">10</a-select-option>
+                <a-select-option :value="15">15</a-select-option>
+                <a-select-option :value="20">20</a-select-option>
+              </a-select>
               <span class="mr20">bmp</span>
             </span>
             <span>
@@ -232,9 +236,9 @@ function transformData(excels: LineData[], offset: number) {
 }
 
 function calc() {
-  if (!checkBasic() || !checkPoint() || !checkParam()) {
-    return
-  }
+  // if (!checkBasic() || !checkPoint() || !checkParam()) {
+  //   return
+  // }
   showResult.value = true
   showDetail.value = false
 
@@ -292,6 +296,10 @@ function download() {
 }
 
 function checkBasic() {
+  if (excels.value.length <= 0) {
+    message.warn('请先上传文件')
+    return false
+  }
   if (!bpm10From.value || !bpm15From.value || !bpm20From.value || !sampleRate.value) {
     message.warn('请先填写绘图信息')
     return false

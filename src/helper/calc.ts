@@ -1,7 +1,7 @@
 import type { LineData } from '@/types/type'
 
 export function calcResult(
-  id: string,
+  id: string, // 单文件显示bmp10/bmp15/bmp20, 多文件显示文件名
   offset: number,
   data: any[],
   points: any[],
