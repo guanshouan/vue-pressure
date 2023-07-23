@@ -44,7 +44,7 @@
             <span class="label ellipsis mr5" :title="excel.fileName" style="width: 120px">{{ excel.fileName }}</span>
             <span>
               <span class="input-title">呼吸频率:</span>
-              <a-select style="width: 100px" class="mr5">
+              <a-select v-model:value="multiInfo[excel.fileId]!.bpm" style="width: 100px" class="mr5">
                 <a-select-option :value="10">10</a-select-option>
                 <a-select-option :value="15">15</a-select-option>
                 <a-select-option :value="20">20</a-select-option>
@@ -53,7 +53,7 @@
             </span>
             <span>
               <span class="input-title">from:</span>
-              <a-input class="short-input mr5" />
+              <a-input v-model:value="multiInfo[excel.fileId]!.from" class="short-input mr5" />
               <span class="mr20">秒</span>
             </span>
             <span>
@@ -160,7 +160,7 @@ import PointTable from '@/components/PointTable.vue'
 import { uploadType } from '@/stores/commonStore'
 import { PressureUnit, UploadType } from '@/types/enum'
 import { excels } from '@/stores/excelDataStore'
-import { getCurrentInstance, ref, computed } from 'vue'
+import { getCurrentInstance, ref, computed, watch } from 'vue'
 import type { LineData } from '@/types/type'
 import LineChartDrawer from '@/helper/LineChartDrawer'
 import { DownloadOutlined, EyeOutlined } from '@ant-design/icons-vue'
@@ -183,9 +183,42 @@ const showDetail = ref(false)
 
 const details = ref<any>({})
 
-const bpm10From = ref(60)
+const bpm10From = ref('')
 const bpm15From = ref('')
 const bpm20From = ref('')
+
+type DrawInfo = {
+  fileName: string
+  bpm: '10' | '15' | '20'
+  from: string
+}
+const multiInfo = ref<{ [propName: string]: DrawInfo }>({})
+
+watch(
+  [excels, uploadType],
+  () => {
+    if (uploadType.value === UploadType.Multi) {
+      excels.value.forEach((excel) => {
+        if (!multiInfo.value[excel.fileId]) {
+          multiInfo.value[excel.fileId] = {
+            fileName: excel.fileName,
+            bpm: '10',
+            from: ''
+          }
+        }
+      })
+      for (let key in multiInfo.value) {
+        if (!excels.value.find((x) => x.fileId === key)) {
+          delete multiInfo.value[key]
+        }
+      }
+    } else {
+      multiInfo.value = {}
+    }
+    console.log('---multiInfo---', multiInfo.value)
+  },
+  { deep: true }
+)
 
 const sampleRate = ref(128)
 
@@ -209,33 +242,55 @@ function draw() {
     return
   }
   showResult.value = false
+  const rate = Number(sampleRate.value)
+  const isSingle = uploadType.value === UploadType.Single
 
   chart1.value.isHide = false
-  let bpm10PointsPerCycle = (60 / 10) * Number(sampleRate.value)
-  let bpm10Offset = Number(bpm10From.value) * Number(sampleRate.value)
+  let excel = excels.value[0]
+  let chart1bmp = isSingle ? 10 : Number(multiInfo.value[excel.fileId]!.bpm)
+  let chart1From = isSingle ? Number(bpm10From.value) : Number(multiInfo.value[excel.fileId]!.from)
+  let chart1Title = isSingle ? '10bmp' : multiInfo.value[excel.fileId]!.fileName
+  let chart1PointsPerCycle = (60 / chart1bmp) * rate
+  let chart1Offset = chart1From * rate
   setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm10Offset), 'chart1', {
-      title: `10bpm (每周期采样点：${bpm10PointsPerCycle})`
+    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, chart1Offset), 'chart1', {
+      title: `${chart1Title} (每周期采样点：${chart1PointsPerCycle})`
     })
   })
 
-  chart2.value.isHide = false
-  let bpm15PointsPerCycle = (60 / 15) * Number(sampleRate.value)
-  let bpm15Offset = Number(bpm15From.value) * Number(sampleRate.value)
-  setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm15Offset), 'chart2', {
-      title: `15bpm (每周期采样点：${bpm15PointsPerCycle})`
+  if (uploadType.value === UploadType.Single || excels.value.length > 1) {
+    chart2.value.isHide = false
+    let excel = isSingle ? excels.value[0] : excels.value[1]
+    let chart2bmp = isSingle ? 15 : Number(multiInfo.value[excel.fileId]!.bpm)
+    let chart2From = isSingle ? Number(bpm15From.value) : Number(multiInfo.value[excel.fileId]!.from)
+    let chart2Title = isSingle ? '15bmp' : multiInfo.value[excel.fileId]!.fileName
+    let chart2PointsPerCycle = (60 / chart2bmp) * rate
+    let chart2Offset = chart2From * rate
+    setTimeout(() => {
+      LineChartDrawer.draw(echarts, transformData(excel.data, chart2Offset), 'chart2', {
+        title: `${chart2Title} (每周期采样点：${chart2PointsPerCycle})`
+      })
     })
-  })
+  } else {
+    chart2.value.isHide = true
+  }
 
-  chart3.value.isHide = false
-  let bpm20PointsPerCycle = (60 / 20) * Number(sampleRate.value)
-  let bpm20Offset = Number(bpm20From.value) * Number(sampleRate.value)
-  setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm20Offset), 'chart3', {
-      title: `20bpm (每周期采样点：${bpm20PointsPerCycle})`
+  if (uploadType.value === UploadType.Single || excels.value.length > 2) {
+    chart3.value.isHide = false
+    let excel = isSingle ? excels.value[0] : excels.value[2]
+    let chart3bmp = isSingle ? 20 : Number(multiInfo.value[excel.fileId]!.bpm)
+    let chart3From = isSingle ? Number(bpm20From.value) : Number(multiInfo.value[excel.fileId]!.from)
+    let chart3Title = isSingle ? '20bmp' : multiInfo.value[excel.fileId]!.fileName
+    let chart3PointsPerCycle = (60 / chart3bmp) * rate
+    let chart3Offset = chart3From * rate
+    setTimeout(() => {
+      LineChartDrawer.draw(echarts, transformData(excel.data, chart3Offset), 'chart3', {
+        title: `${chart3Title} (每周期采样点：${chart3PointsPerCycle})`
+      })
     })
-  })
+  } else {
+    chart3.value.isHide = true
+  }
 }
 
 function transformData(excels: LineData[], offset: number) {
@@ -243,9 +298,10 @@ function transformData(excels: LineData[], offset: number) {
 }
 
 function calc() {
-  // if (!checkBasic() || !checkPoint() || !checkParam()) {
-  //   return
-  // }
+  if (!(checkBasic() && checkChart() && checkParam())) {
+    return
+  }
+
   showResult.value = true
   showDetail.value = false
 
@@ -307,19 +363,37 @@ function checkBasic() {
     message.warn('请先上传文件')
     return false
   }
-  if (!bpm10From.value || !bpm15From.value || !bpm20From.value || !sampleRate.value) {
-    message.warn('请先填写绘图信息')
+  if (uploadType.value === UploadType.Single) {
+    if (!bpm10From.value || !bpm15From.value || !bpm20From.value || !sampleRate.value) {
+      message.warn('请先填写绘图信息')
+      return false
+    }
+  }
+  if (uploadType.value === UploadType.Multi) {
+    for (let key in multiInfo.value) {
+      if (!multiInfo.value[key].from) {
+        message.warn('请先填写绘图信息')
+        return false
+      }
+    }
+  }
+  return true
+}
+
+function checkChart() {
+  if (chart1.value.isHide) {
+    message.warn('请先完成绘图')
+    return false
+  }
+  if (!(checkPoint(chart1) && checkPoint(chart2) && checkPoint(chart3))) {
+    message.warn('请先在图中取标准点')
     return false
   }
   return true
 }
 
-function checkPoint() {
-  if (!bpm10From.value || !bpm15From.value || !bpm20From.value || !sampleRate.value) {
-    message.warn('请先完成绘图并取标准点')
-    return false
-  }
-  return true
+function checkPoint(chart: any) {
+  return chart1.value.isHide || chart.value.generate().length
 }
 
 function checkParam() {

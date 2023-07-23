@@ -77,7 +77,11 @@ function process(point: string) {
   return point.split(', ') // [x, y]
 }
 
+// 返回[]代表未完成取点
 function generate() {
+  if (point1.value === '' || point2.value === '' || point3.value === '') {
+    return []
+  }
   return [process(point1.value), process(point2.value), process(point3.value)]
 }
 
