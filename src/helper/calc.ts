@@ -15,14 +15,14 @@ export function calcResult(
 ) {
   let { cycleDataArr, pointIndex } = getCycleDataArr(offset, data, points)
 
-  const stratPointX = points[0][0]
+  const startPointX = points[0][0]
   const midPointX = points[1][0]
 
   let inCycleDataArr = cycleDataArr.map((x) =>
-    getCycleValidData(x.slice(0, midPointX - stratPointX), inBeginPercent, inEndPercent)
+    getCycleValidData(x.slice(0, midPointX - startPointX), inBeginPercent, inEndPercent)
   )
   let outCycleDataArr = cycleDataArr.map((x) =>
-    getCycleValidData(x.slice(midPointX - stratPointX), outBeginPercent, outEndPercent)
+    getCycleValidData(x.slice(midPointX - startPointX), outBeginPercent, outEndPercent)
   )
 
   // 正偏差arr
@@ -154,7 +154,7 @@ export function getNeg(arr: any[], standard: number) {
   return toFixed(Math.min(...arr.map((data) => data[1])) - standard)
 }
 
-export function getMax(arr: LineData[], standard: number) {
+export function getMax(arr: any[], standard: number) {
   if (Math.abs(getPos(arr, standard)) > Math.abs(getNeg(arr, standard))) {
     return getPos(arr, standard)
   } else {
