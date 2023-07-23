@@ -244,16 +244,17 @@ function draw() {
   if (!checkBasic()) {
     return
   }
+  // 每次绘图，清空结果
   showResult.value = false
   const rate = Number(sampleRate.value)
 
   if (excels.value.length > 0) {
     chart1.value.isHide = false
     let excel = excels.value[0]
-    let chart1bmp = isSingle.value ? 10 : Number(multiInfo.value[excel.fileId]!.bpm)
+    let chart1bpm = isSingle.value ? 10 : Number(multiInfo.value[excel.fileId]!.bpm)
     let chart1From = isSingle.value ? Number(bpm10From.value) : Number(multiInfo.value[excel.fileId]!.from)
-    let chart1Title = isSingle.value ? '10bmp' : multiInfo.value[excel.fileId]!.name
-    let chart1PointsPerCycle = (60 / chart1bmp) * rate
+    let chart1Title = isSingle.value ? '10bpm' : multiInfo.value[excel.fileId]!.name
+    let chart1PointsPerCycle = (60 / chart1bpm) * rate
     let chart1Offset = chart1From * rate
     setTimeout(() => {
       LineChartDrawer.draw(echarts, transformData(excels.value[0].data, chart1Offset), 'chart1', {
@@ -266,10 +267,10 @@ function draw() {
   if (uploadType.value === UploadType.Single || excels.value.length > 1) {
     chart2.value.isHide = false
     let excel = isSingle.value ? excels.value[0] : excels.value[1]
-    let chart2bmp = isSingle.value ? 15 : Number(multiInfo.value[excel.fileId]!.bpm)
+    let chart2bpm = isSingle.value ? 15 : Number(multiInfo.value[excel.fileId]!.bpm)
     let chart2From = isSingle.value ? Number(bpm15From.value) : Number(multiInfo.value[excel.fileId]!.from)
-    let chart2Title = isSingle.value ? '15bmp' : multiInfo.value[excel.fileId]!.name
-    let chart2PointsPerCycle = (60 / chart2bmp) * rate
+    let chart2Title = isSingle.value ? '15bpm' : multiInfo.value[excel.fileId]!.name
+    let chart2PointsPerCycle = (60 / chart2bpm) * rate
     let chart2Offset = chart2From * rate
     setTimeout(() => {
       LineChartDrawer.draw(echarts, transformData(excel.data, chart2Offset), 'chart2', {
@@ -284,10 +285,10 @@ function draw() {
   if (uploadType.value === UploadType.Single || excels.value.length > 2) {
     chart3.value.isHide = false
     let excel = isSingle.value ? excels.value[0] : excels.value[2]
-    let chart3bmp = isSingle.value ? 20 : Number(multiInfo.value[excel.fileId]!.bpm)
+    let chart3bpm = isSingle.value ? 20 : Number(multiInfo.value[excel.fileId]!.bpm)
     let chart3From = isSingle.value ? Number(bpm20From.value) : Number(multiInfo.value[excel.fileId]!.from)
-    let chart3Title = isSingle.value ? '20bmp' : multiInfo.value[excel.fileId]!.name
-    let chart3PointsPerCycle = (60 / chart3bmp) * rate
+    let chart3Title = isSingle.value ? '20bpm' : multiInfo.value[excel.fileId]!.name
+    let chart3PointsPerCycle = (60 / chart3bpm) * rate
     let chart3Offset = chart3From * rate
     setTimeout(() => {
       LineChartDrawer.draw(echarts, transformData(excel.data, chart3Offset), 'chart3', {
@@ -334,8 +335,9 @@ function calc() {
 
   setTimeout(() => {
     resultTable.value.data = [chart1Result.result, chart2Result?.result, chart3Result?.result].filter(Boolean)
+    resultTable.value.render()
     pointTable.value.data = [chart1Result.point, chart2Result?.point, chart3Result?.point].filter(Boolean)
-
+    pointTable.value.render()
     details.value = { ...chart1Result.detail, ...chart2Result?.detail, ...chart3Result?.detail }
   })
 }
@@ -344,11 +346,13 @@ function calcAdapter(excel: ExcelData, chart: any, singleParam: Info) {
   const rate = Number(sampleRate.value)
 
   let from = isSingle.value ? Number(singleParam.from) : Number(multiInfo.value[excel.fileId]!.from)
-  let title = isSingle.value ? '20bpm' : multiInfo.value[excel.fileId]!.name
+  let bpm = isSingle.value ? singleParam.bpm : multiInfo.value[excel.fileId]!.bpm
+  let name = isSingle.value ? singleParam.name : multiInfo.value[excel.fileId]!.name
   let offset = from * rate
 
-  return calcResult(
-    title,
+  let res = calcResult(
+    name,
+    bpm,
     offset,
     transformData(excel.data, offset),
     chart.value.generate(),
@@ -359,6 +363,8 @@ function calcAdapter(excel: ExcelData, chart: any, singleParam: Info) {
     Number(outEndPercent.value),
     Number(outStandard.value)
   )
+
+  return res
 }
 
 function download() {

@@ -1,7 +1,8 @@
 import type { LineData } from '@/types/type'
 
 export function calcResult(
-  id: string, // 单文件显示bmp10/bmp15/bmp20, 多文件显示文件名
+  name: string, // 单文件显示bpm10/bpm15/bpm20, 多文件显示文件名
+  bpm: string,
   offset: number,
   data: any[],
   points: any[],
@@ -26,23 +27,23 @@ export function calcResult(
 
   // 正偏差arr
   let inPosArr = inCycleDataArr.map((x) => getPos(x, inStandard))
-  console.log(`-------${id}吸气相正偏差结果集-------`, inPosArr)
+  console.log(`-------${name}吸气相正偏差结果集-------`, inPosArr)
   // 负偏差arr
   let inNegArr = inCycleDataArr.map((x) => getNeg(x, inStandard))
-  console.log(`-------${id}吸气相负偏差结果集-------`, inNegArr)
+  console.log(`-------${name}吸气相负偏差结果集-------`, inNegArr)
   // 偏差arr
   let inMaxArr = inCycleDataArr.map((x) => getMax(x, inStandard))
-  console.log(`-------${id}吸气相偏差结果集-------`, inMaxArr)
+  console.log(`-------${name}吸气相偏差结果集-------`, inMaxArr)
 
   // 正偏差arr
   let outPosArr = outCycleDataArr.map((x) => getPos(x, outStandard))
-  console.log(`-------${id}呼气相正偏差结果集-------`, outPosArr)
+  console.log(`-------${name}呼气相正偏差结果集-------`, outPosArr)
   // 负偏差arr
   let outNegArr = outCycleDataArr.map((x) => getNeg(x, outStandard))
-  console.log(`-------${id}呼气相负偏差结果集-------`, outNegArr)
+  console.log(`-------${name}呼气相负偏差结果集-------`, outNegArr)
   // 偏差arr
   let outMaxArr = outCycleDataArr.map((x) => getMax(x, outStandard))
-  console.log(`-------${id}呼气相偏差结果集-------`, outMaxArr)
+  console.log(`-------${name}呼气相偏差结果集-------`, outMaxArr)
 
   let inPosAvg = calcAvg(inPosArr)
   let inPosSd = calcSd(inPosArr)
@@ -59,7 +60,8 @@ export function calcResult(
   let outMaxSd = calcSd(outMaxArr)
 
   let point = {
-    id,
+    name,
+    bpm,
     inPos: inPosArr[pointIndex],
     inNeg: inNegArr[pointIndex],
     inMax: inMaxArr[pointIndex],
@@ -68,7 +70,8 @@ export function calcResult(
     outMax: outMaxArr[pointIndex]
   }
   let result = {
-    id,
+    name,
+    bpm,
     inPosAvg,
     inPosSd,
     inNegAvg,
@@ -87,13 +90,13 @@ export function calcResult(
     point,
     result,
     detail: {
-      [`${id}选中周期index`]: pointIndex,
-      [`${id}吸气相正偏差结果集`]: inPosArr,
-      [`${id}吸气相负偏差结果集`]: inNegArr,
-      [`${id}吸气相偏差结果集`]: inMaxArr,
-      [`${id}呼气相正偏差结果集`]: outPosArr,
-      [`${id}呼气相负偏差结果集`]: outNegArr,
-      [`${id}呼气相偏差结果集`]: outMaxArr
+      [`${name}选中周期index`]: pointIndex,
+      [`${name}吸气相正偏差结果集`]: inPosArr,
+      [`${name}吸气相负偏差结果集`]: inNegArr,
+      [`${name}吸气相偏差结果集`]: inMaxArr,
+      [`${name}呼气相正偏差结果集`]: outPosArr,
+      [`${name}呼气相负偏差结果集`]: outNegArr,
+      [`${name}呼气相偏差结果集`]: outMaxArr
     }
   }
 }

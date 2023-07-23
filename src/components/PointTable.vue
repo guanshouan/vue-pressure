@@ -3,12 +3,19 @@
 </template>
 
 <script setup lang="ts">
+import { uploadType } from '@/stores/commonStore'
+import { UploadType } from '@/types/enum'
 import { ref } from 'vue'
 
-const columns = [
+const columns = ref([
+  {
+    title: '文件名',
+    dataIndex: 'name',
+    hide: UploadType.Single
+  },
   {
     title: 'bpm',
-    dataIndex: 'id'
+    dataIndex: 'bpm'
   },
   {
     title: '吸气相最大正偏差',
@@ -34,9 +41,14 @@ const columns = [
     title: '呼气相最大偏差',
     dataIndex: 'outMax'
   }
-]
+])
+
+// 每次计算，执行render，更新列
+function render() {
+  columns.value = columns.value.filter((x) => x.hide !== uploadType.value)
+}
 
 const data: any = ref([])
 
-defineExpose({ data })
+defineExpose({ data, render })
 </script>

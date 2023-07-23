@@ -1,6 +1,7 @@
 <template>
   <a-table :data-source="data" :pagination="false" bordered>
-    <a-table-column key="id" title="bpm" data-index="id" />
+    <a-table-column v-if="type === UploadType.Multi" key="name" title="文件名" data-index="name" />
+    <a-table-column key="bpm" title="bpm" data-index="bpm" />
     <a-table-column-group>
       <template #title>最大偏差平均值</template>
       <a-table-column key="inPosAvg" title="吸气相正偏差" data-index="inPosAvg" />
@@ -23,9 +24,18 @@
 </template>
 
 <script setup lang="ts">
+import { uploadType } from '@/stores/commonStore'
+import { UploadType } from '@/types/enum'
 import { ref } from 'vue'
+
+const type = ref(UploadType.Single)
 
 const data: any = ref([])
 
-defineExpose({ data })
+// 每次计算，执行render，更新列
+function render() {
+  type.value = uploadType.value
+}
+
+defineExpose({ data, render })
 </script>
