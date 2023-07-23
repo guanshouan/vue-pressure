@@ -8,7 +8,7 @@ function addExcelData(data: ExcelData) {
 }
 
 function removeExcelData(fileId: string) {
-  excels.value = excels.value.filter((x) => x.fileId === fileId)
+  excels.value = excels.value.filter((x) => x.fileId !== fileId)
 }
 
 export { excels, addExcelData, removeExcelData }

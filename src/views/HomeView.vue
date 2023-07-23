@@ -28,7 +28,7 @@
           </span>
           <span>
             <span class="input-title">每秒采样率:</span>
-            <a-input class="short-input mr5" v-model:value="sampleRate" />
+            <a-input class="mini-input mr5" v-model:value="sampleRate" />
             <span class="mr20">次/秒</span>
           </span>
           <span>
@@ -41,10 +41,10 @@
         </div>
         <div class="mb20" v-if="uploadType === UploadType.Multi">
           <div v-for="excel in excels" :key="excel.fileId" class="flex-center mb10">
-            <span class="label ellipsis mr10" :title="excel.fileName" style="width: 120px">{{ excel.fileName }}</span>
+            <span class="label ellipsis mr5" :title="excel.fileName" style="width: 120px">{{ excel.fileName }}</span>
             <span>
               <span class="input-title">呼吸频率:</span>
-              <a-select style="width: 80px" class="mr5">
+              <a-select style="width: 100px" class="mr5">
                 <a-select-option :value="10">10</a-select-option>
                 <a-select-option :value="15">15</a-select-option>
                 <a-select-option :value="20">20</a-select-option>
@@ -58,8 +58,15 @@
             </span>
             <span>
               <span class="input-title">每秒采样率:</span>
-              <a-input class="short-input mr5" />
+              <a-input class="mini-input mr5" v-model:value="sampleRate" />
               <span class="mr20">次/秒</span>
+            </span>
+            <span>
+              <span class="input-title">压力单位:</span>
+              <a-select v-model:value="pressureUnit" style="width: 90px" class="mr20">
+                <a-select-option :value="PressureUnit.cmH2O">cmH<sub>2</sub>O</a-select-option>
+                <a-select-option :value="PressureUnit.hPa">hPa</a-select-option>
+              </a-select>
             </span>
           </div>
         </div>
@@ -67,9 +74,9 @@
       </div>
       <!-- 图像区域 -->
       <div>
-        <LineChartBox id="bpm10" ref="bpm10" class="mb20" />
-        <LineChartBox id="bpm15" ref="bpm15" class="mb20" />
-        <LineChartBox id="bpm20" ref="bpm20" class="mb20" />
+        <LineChartBox id="chart1" ref="chart1" class="mb20" />
+        <LineChartBox id="chart2" ref="chart2" class="mb20" />
+        <LineChartBox id="chart3" ref="chart3" class="mb20" />
       </div>
       <div class="split-line"></div>
       <!-- 参数设置区域 -->
@@ -167,9 +174,9 @@ const printDiv = ref()
 const resultTable = ref()
 const pointTable = ref()
 
-const bpm10 = ref()
-const bpm15 = ref()
-const bpm20 = ref()
+const chart1 = ref()
+const chart2 = ref()
+const chart3 = ref()
 
 const showResult = ref(false)
 const showDetail = ref(false)
@@ -203,29 +210,29 @@ function draw() {
   }
   showResult.value = false
 
-  bpm10.value.isHide = false
+  chart1.value.isHide = false
   let bpm10PointsPerCycle = (60 / 10) * Number(sampleRate.value)
   let bpm10Offset = Number(bpm10From.value) * Number(sampleRate.value)
   setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm10Offset), 'bpm10', {
+    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm10Offset), 'chart1', {
       title: `10bpm (每周期采样点：${bpm10PointsPerCycle})`
     })
   })
 
-  bpm15.value.isHide = false
+  chart2.value.isHide = false
   let bpm15PointsPerCycle = (60 / 15) * Number(sampleRate.value)
   let bpm15Offset = Number(bpm15From.value) * Number(sampleRate.value)
   setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm15Offset), 'bpm15', {
+    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm15Offset), 'chart2', {
       title: `15bpm (每周期采样点：${bpm15PointsPerCycle})`
     })
   })
 
-  bpm20.value.isHide = false
+  chart3.value.isHide = false
   let bpm20PointsPerCycle = (60 / 20) * Number(sampleRate.value)
   let bpm20Offset = Number(bpm20From.value) * Number(sampleRate.value)
   setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm20Offset), 'bpm20', {
+    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm20Offset), 'chart3', {
       title: `20bpm (每周期采样点：${bpm20PointsPerCycle})`
     })
   })
@@ -250,7 +257,7 @@ function calc() {
     'bpm10',
     bpm10Offset,
     transformData(excels.value[0].data, bpm10Offset),
-    bpm10.value.generate(),
+    chart1.value.generate(),
     Number(inBeginPercent.value),
     Number(inEndPercent.value),
     Number(inStandard.value),
@@ -262,7 +269,7 @@ function calc() {
     'bpm15',
     bpm15Offset,
     transformData(excels.value[0].data, bpm15Offset),
-    bpm15.value.generate(),
+    chart2.value.generate(),
     Number(inBeginPercent.value),
     Number(inEndPercent.value),
     Number(inStandard.value),
@@ -274,7 +281,7 @@ function calc() {
     'bpm20',
     bpm20Offset,
     transformData(excels.value[0].data, bpm20Offset),
-    bpm20.value.generate(),
+    chart3.value.generate(),
     Number(inBeginPercent.value),
     Number(inEndPercent.value),
     Number(inStandard.value),
