@@ -1,64 +1,74 @@
 body {
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .flex {
-    display: flex;
+  display: flex;
 }
 
 .flex-center {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .mr5 {
-    margin-right: 5px;
+  margin-right: 5px;
 }
 
 .mr10 {
-    margin-right: 10px;
+  margin-right: 10px;
 }
 
 .mr20 {
-    margin-right: 20px;
+  margin-right: 20px;
 }
 
 .mb5 {
-    margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 
-
 .mb10 {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .mb20 {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 .mb30 {
-    margin-bottom: 30px;
+  margin-bottom: 30px;
+}
+
+.label {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .input {
-    width: 180px;
+  width: 180px;
 }
 
 .short-input {
-    width: 120px;
+  width: 120px;
 }
 
 .mini-input {
-    width: 100px;
+  width: 100px;
 }
 
 .input-title {
-    margin-right: 8px;
+  margin-right: 8px;
 }
 
 .chart-box {
-    width: 80%;
-    height: 350px;
-    margin-bottom: 10px;
+  width: 80%;
+  height: 350px;
+  margin-bottom: 10px;
 }

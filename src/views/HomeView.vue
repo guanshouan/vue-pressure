@@ -5,7 +5,7 @@
     <div class="split-line" style="margin: 0 -20px"></div>
     <div class="main-box" ref="printDiv">
       <!-- 文件上传区域 -->
-      <div style="padding-top: 20px">
+      <div class="upload-box">
         <h3 style="margin-top: 0">数据上传</h3>
         <div class="mb20">
           <UploadExcel />
@@ -40,8 +40,8 @@
           </span>
         </div>
         <div class="mb20" v-if="uploadType === UploadType.Multi">
-          <div v-for="(value, index) in excelData" :key="value.fileId" class="flex-center mb10">
-            <span class="mr10">文件{{ index + 1 }}：</span>
+          <div v-for="excel in excels" :key="excel.fileId" class="flex-center mb10">
+            <span class="label ellipsis mr10" :title="excel.fileName" style="width: 120px">{{ excel.fileName }}</span>
             <span>
               <span class="input-title">呼吸频率:</span>
               <a-input class="short-input mr5" />
@@ -123,11 +123,11 @@
             <span v-if="pressureUnit === PressureUnit.hPa">hPa</span>)
           </h3>
           <div class="mb30">
-            <div class="table-title">选中周期</div>
+            <div class="label mb5">选中周期</div>
             <PointTable ref="pointTable" />
           </div>
           <div>
-            <div class="table-title">
+            <div class="label mb5">
               所有周期&nbsp;&nbsp;<eye-outlined @click="showDetail = !showDetail" style="cursor: pointer" />
             </div>
             <div class="detail" v-show="showDetail">
@@ -148,12 +148,13 @@ import ResultTable from '@/components/ResultTable.vue'
 import PointTable from '@/components/PointTable.vue'
 import { uploadType } from '@/stores/commonStore'
 import { PressureUnit, UploadType } from '@/types/enum'
-import { excelData } from '@/stores/excelDataStore'
-import { watch, getCurrentInstance, ref, computed } from 'vue'
+import { excels } from '@/stores/excelDataStore'
+import { getCurrentInstance, ref, computed } from 'vue'
 import type { LineData } from '@/types/type'
 import LineChartDrawer from '@/helper/LineChartDrawer'
 import { DownloadOutlined, EyeOutlined } from '@ant-design/icons-vue'
 import { calcResult } from '@/helper/calc'
+import { message } from 'ant-design-vue'
 
 let echarts = getCurrentInstance()!.appContext.config.globalProperties.$echarts
 let getPdf = getCurrentInstance()!.appContext.config.globalProperties.$getPdf
@@ -193,13 +194,16 @@ const outEndPercent = ref('')
 const remark = ref('')
 
 function draw() {
+  if (!checkBasic()) {
+    return
+  }
   showResult.value = false
 
   bpm10.value.isHide = false
   let bpm10PointsPerCycle = (60 / 10) * Number(sampleRate.value)
   let bpm10Offset = Number(bpm10From.value) * Number(sampleRate.value)
   setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excelData.value[0]!, bpm10Offset), 'bpm10', {
+    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm10Offset), 'bpm10', {
       title: `10bpm (每周期采样点：${bpm10PointsPerCycle})`
     })
   })
@@ -208,7 +212,7 @@ function draw() {
   let bpm15PointsPerCycle = (60 / 15) * Number(sampleRate.value)
   let bpm15Offset = Number(bpm15From.value) * Number(sampleRate.value)
   setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excelData.value[0]!, bpm15Offset), 'bpm15', {
+    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm15Offset), 'bpm15', {
       title: `15bpm (每周期采样点：${bpm15PointsPerCycle})`
     })
   })
@@ -217,17 +221,20 @@ function draw() {
   let bpm20PointsPerCycle = (60 / 20) * Number(sampleRate.value)
   let bpm20Offset = Number(bpm20From.value) * Number(sampleRate.value)
   setTimeout(() => {
-    LineChartDrawer.draw(echarts, transformData(excelData.value[0]!, bpm20Offset), 'bpm20', {
+    LineChartDrawer.draw(echarts, transformData(excels.value[0].data, bpm20Offset), 'bpm20', {
       title: `20bpm (每周期采样点：${bpm20PointsPerCycle})`
     })
   })
 }
 
-function transformData(excelData: LineData[], offset: number) {
-  return excelData.map((data) => [data.x, data.y]).slice(offset, offset + allPointNum.value)
+function transformData(excels: LineData[], offset: number) {
+  return excels.map((data) => [data.x, data.y]).slice(offset, offset + allPointNum.value)
 }
 
 function calc() {
+  if (!checkBasic() || !checkPoint() || !checkParam()) {
+    return
+  }
   showResult.value = true
   showDetail.value = false
 
@@ -238,7 +245,7 @@ function calc() {
   let bmp10Result = calcResult(
     'bpm10',
     bpm10Offset,
-    transformData(excelData.value[0]!, bpm10Offset),
+    transformData(excels.value[0].data, bpm10Offset),
     bpm10.value.generate(),
     Number(inBeginPercent.value),
     Number(inEndPercent.value),
@@ -250,7 +257,7 @@ function calc() {
   let bmp15Result = calcResult(
     'bpm15',
     bpm15Offset,
-    transformData(excelData.value[0]!, bpm15Offset),
+    transformData(excels.value[0].data, bpm15Offset),
     bpm15.value.generate(),
     Number(inBeginPercent.value),
     Number(inEndPercent.value),
@@ -262,7 +269,7 @@ function calc() {
   let bmp20Result = calcResult(
     'bpm20',
     bpm20Offset,
-    transformData(excelData.value[0]!, bpm20Offset),
+    transformData(excels.value[0].data, bpm20Offset),
     bpm20.value.generate(),
     Number(inBeginPercent.value),
     Number(inEndPercent.value),
@@ -283,28 +290,74 @@ function calc() {
 function download() {
   getPdf(printDiv.value, 'mypdf')
 }
+
+function checkBasic() {
+  if (!bpm10From.value || !bpm15From.value || !bpm20From.value || !sampleRate.value) {
+    message.warn('请先填写绘图信息')
+    return false
+  }
+  return true
+}
+
+function checkPoint() {
+  if (!bpm10From.value || !bpm15From.value || !bpm20From.value || !sampleRate.value) {
+    message.warn('请先完成绘图并取标准点')
+    return false
+  }
+  return true
+}
+
+function checkParam() {
+  if (
+    !inStandard.value ||
+    !inBeginPercent.value ||
+    !inEndPercent.value ||
+    !outStandard.value ||
+    !outBeginPercent.value ||
+    !outEndPercent.value
+  ) {
+    message.warn('请先填写参数设置')
+    return false
+  }
+  return true
+}
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .layout {
   padding: 0 20px;
-}
+  .home-title {
+    text-align: center;
+  }
+  .main-box {
+    padding: 0 20px;
+    .upload-box {
+      padding-top: 20px;
+      .excel-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 120px;
+        color: rgba(0, 0, 0, 0.45);
+      }
+    }
+    .result-box {
+      min-height: 200px;
+      padding-bottom: 50px;
 
-.main-box {
-  padding: 0 20px;
-}
-
-.home-title {
-  text-align: center;
+      .detail {
+        background: rgb(245, 245, 245);
+        padding: 10px;
+        max-height: 300px;
+        overflow: auto;
+        margin: 10px 0px;
+      }
+    }
+  }
 }
 
 .split-line {
   border-top: 1px solid rgba(60, 60, 60, 0.12);
-}
-
-.result-box {
-  min-height: 200px;
-  padding-bottom: 50px;
 }
 
 .export-icon {
@@ -314,19 +367,5 @@ function download() {
   right: 25px;
   font-size: 24px;
   color: #1677ff;
-}
-
-.table-title {
-  font-size: 13px;
-  margin-bottom: 5px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.detail {
-  background: rgb(245, 245, 245);
-  padding: 10px;
-  max-height: 300px;
-  overflow: auto;
-  margin: 10px 0px;
 }
 </style>

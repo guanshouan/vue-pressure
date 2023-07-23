@@ -1,18 +1,14 @@
-import type { LineData } from '@/types/type'
+import type { ExcelData } from '@/types/type'
 import { ref } from 'vue'
 
-// const excelData = ref<Map<string, LineData[]>>(new Map())
-// const excelData = ref<{ [propName: string]: LineData[] | undefined }>({})
-// const excelData = ref<Array<LineData[]>>([])
-const excelData = ref<any>([])
+const excels = ref<ExcelData[]>([])
 
-function addExcelData(fileId: string, data: LineData[]) {
-  ;(data as any).fileId = fileId
-  excelData.value.push(data)
+function addExcelData(data: ExcelData) {
+  excels.value.push(data)
 }
 
 function removeExcelData(fileId: string) {
-  excelData.value = excelData.value.filter((x: any) => x.fileId === fileId)
+  excels.value = excels.value.filter((x) => x.fileId === fileId)
 }
 
-export { excelData, addExcelData, removeExcelData }
+export { excels, addExcelData, removeExcelData }

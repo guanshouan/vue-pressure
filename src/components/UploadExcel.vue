@@ -53,7 +53,11 @@ function beforeUpload(file: any) {
 
     isUploading.value = false
 
-    excelDataStore.addExcelData(file.uid, data)
+    excelDataStore.addExcelData({
+      fileId: file.uid,
+      fileName: file.name,
+      data
+    })
 
     if (uploadType.value === UploadType.Single && fileList.value.length === 1) {
       excelDataStore.removeExcelData(fileList.value[0].uid)
