@@ -1,6 +1,4 @@
-import type { LineData } from '@/types/type'
-
-export function calcResult(
+function calcResult(
   name: string, // 单文件显示bpm10/bpm15/bpm20, 多文件显示文件名
   bpm: string,
   offset: number,
@@ -27,23 +25,17 @@ export function calcResult(
 
   // 正偏差arr
   let inPosArr = inCycleDataArr.map((x) => getPos(x, inStandard))
-  console.log(`-------${name}吸气相正偏差结果集-------`, inPosArr)
   // 负偏差arr
   let inNegArr = inCycleDataArr.map((x) => getNeg(x, inStandard))
-  console.log(`-------${name}吸气相负偏差结果集-------`, inNegArr)
   // 偏差arr
   let inMaxArr = inCycleDataArr.map((x) => getMax(x, inStandard))
-  console.log(`-------${name}吸气相偏差结果集-------`, inMaxArr)
 
   // 正偏差arr
   let outPosArr = outCycleDataArr.map((x) => getPos(x, outStandard))
-  console.log(`-------${name}呼气相正偏差结果集-------`, outPosArr)
   // 负偏差arr
   let outNegArr = outCycleDataArr.map((x) => getNeg(x, outStandard))
-  console.log(`-------${name}呼气相负偏差结果集-------`, outNegArr)
   // 偏差arr
   let outMaxArr = outCycleDataArr.map((x) => getMax(x, outStandard))
-  console.log(`-------${name}呼气相偏差结果集-------`, outMaxArr)
 
   let inPosAvg = calcAvg(inPosArr)
   let inPosSd = calcSd(inPosArr)
@@ -102,7 +94,7 @@ export function calcResult(
 }
 
 // 获取周期数据  data: [[x, y], ...]
-export function getCycleDataArr(offset: number, data: any[], points: any[]) {
+function getCycleDataArr(offset: number, data: any[], points: any[]) {
   const cycleDataArr = []
   let pointData: any // ponits对应周期的数据，用于后续单独显示值
 
@@ -140,38 +132,38 @@ export function getCycleDataArr(offset: number, data: any[], points: any[]) {
   return { cycleDataArr, pointIndex: cycleDataArr.indexOf(pointData) }
 }
 
-export function getCycleValidData(data: any[], beginPercent: number, endPercent: number) {
+function getCycleValidData(data: any[], beginPercent: number, endPercent: number) {
   const startIndex = parseInt(((beginPercent / 100) * data.length) as any)
   const endIndex = parseInt((data.length - (endPercent / 100) * data.length) as any)
   return data.slice(startIndex, endIndex)
 }
 
-export function getPos(arr: any[], standard: number) {
+function getPos(arr: any[], standard: number) {
   return toFixed(Math.max(...arr.map((data) => data[1])) - standard)
 }
 
-export function getNeg(arr: any[], standard: number) {
+function getNeg(arr: any[], standard: number) {
   return toFixed(Math.min(...arr.map((data) => data[1])) - standard)
 }
 
-export function getMax(arr: any[], standard: number) {
-  if (Math.abs(getPos(arr, standard)) > Math.abs(getNeg(arr, standard))) {
+function getMax(arr: any[], standard: number) {
+  if (Math.abs(Number(getPos(arr, standard))) > Math.abs(Number(getNeg(arr, standard)))) {
     return getPos(arr, standard)
   } else {
     return getNeg(arr, standard)
   }
 }
 
-export function calcAvg(data: number[]) {
-  return toFixed(data.reduce((sum, value) => sum + value, 0) / data.length)
+function calcAvg(data: string[]) {
+  return toFixed(data.reduce((sum, value) => sum + Number(value), 0) / data.length)
 }
 
-export function calcSd(data: number[]) {
+function calcSd(data: string[]) {
   // 计算平均值
-  const mean = data.reduce((sum, value) => sum + value, 0) / data.length
+  const mean = data.reduce((sum, value) => sum + Number(value), 0) / data.length
 
   // 计算每个数据点与平均值的差的平方
-  const squaredDifferences = data.map((value) => Math.pow(value - mean, 2))
+  const squaredDifferences = data.map((value) => Math.pow(Number(value) - mean, 2))
 
   // 计算平方差的平均值
   const meanSquaredDifference = squaredDifferences.reduce((sum, value) => sum + value, 0) / squaredDifferences.length
@@ -183,5 +175,7 @@ export function calcSd(data: number[]) {
 }
 
 function toFixed(value: number, fixNum = 3) {
-  return parseFloat(value.toFixed(fixNum))
+  return value.toFixed(fixNum)
 }
+
+export { calcResult }

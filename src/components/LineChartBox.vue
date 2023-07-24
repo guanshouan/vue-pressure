@@ -1,5 +1,5 @@
 <template>
-  <div :style="{ display: isHide ? 'none' : 'block' }">
+  <div :style="{ display: isHide ? 'none' : 'block', marginLeft: '-120px' }">
     <div :id="props.id" @click="record" class="chart-box"></div>
     <div style="margin-left: 140px">
       <span class="input-title">point1：</span><a-input class="mr20 short-input" v-model:value="point1" readonly />

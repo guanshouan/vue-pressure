@@ -6,9 +6,6 @@ export default {
   install(app: any) {
     app.config.globalProperties.$getPdf = function (el: any, title = 'test') {
       html2Canvas(el, {
-        // html2Canvas(document.querySelector('#pdfDom'), { //这是在界面上设置一个id
-        // 只下载id为pdfDom的内容
-        // html2Canvas(document.body, { //body是下载整个界面
         useCORS: true, //是否尝试使用CORS从服务器加载图像
         allowTaint: true,
         dpi: 300, //解决生产图片模糊

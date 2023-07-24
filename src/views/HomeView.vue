@@ -4,6 +4,29 @@
     <h1 class="home-title">双水平动态压力计算系统</h1>
     <div class="split-line" style="margin: 0 -20px"></div>
     <div class="main-box" ref="printDiv">
+      <!-- 检验信息区域 -->
+      <div class="flex-center" style="padding-top: 20px">
+        <span>
+          <span class="input-title">任务号:</span>
+          <a-input class="short-input mr10" />
+        </span>
+        <span>
+          <span class="input-title">日期:</span>
+          <a-input class="short-input mr10" />
+        </span>
+        <span>
+          <span class="input-title">温度:</span>
+          <a-input class="mini-input mr10" />
+        </span>
+        <span>
+          <span class="input-title">湿度:</span>
+          <a-input class="mini-input mr10" />
+        </span>
+        <span>
+          <span class="input-title">附件:</span>
+          <a-input class="mini-input mr10" />
+        </span>
+      </div>
       <!-- 文件上传区域 -->
       <div class="upload-box">
         <h3 style="margin-top: 0">数据上传</h3>
@@ -368,7 +391,7 @@ function calcAdapter(excel: ExcelData, chart: any, singleParam: Info) {
 }
 
 function download() {
-  getPdf(printDiv.value, 'mypdf')
+  getPdf(printDiv.value, '计算结果')
 }
 
 function checkBasic() {
