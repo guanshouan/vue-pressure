@@ -20,10 +20,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 let router = useRouter()
+let route = useRoute()
 const items = ref([
   {
     key: 'CPAP',
@@ -37,13 +38,23 @@ const items = ref([
 
 const selectedKeys = ref(['CPAP'])
 
+watch(
+  () => route.name,
+  (newVal) => {
+    if (newVal) {
+      selectedKeys.value = [newVal as string]
+    }
+  },
+  { immediate: true }
+)
+
 function changeMenu({ key }: any) {
-  router.push(key)
+  router.push({ name: key })
 }
 
 function toHome() {
   selectedKeys.value = ['CPAP']
-  router.push('CPAP')
+  router.push({ name: 'CPAP' })
   // window.open('https://www.lmti.cn/?d20q8=idfa7.html')
 }
 </script>

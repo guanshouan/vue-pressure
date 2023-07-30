@@ -17,10 +17,12 @@ const router = createRouter({
         },
         {
           path: '/CPAP',
+          name: 'CPAP',
           component: CpapSystem
         },
         {
           path: '/BIPAP',
+          name: 'BIPAP',
           component: BipapSystem
         }
       ]
