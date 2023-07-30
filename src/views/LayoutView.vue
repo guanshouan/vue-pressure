@@ -33,10 +33,10 @@ const selectedKeys = ref(['1'])
 
 function handleClick({ key }: any) {
   if (key === '1') {
-    router.push('/home')
+    router.push('/system1')
   }
   if (key === '2') {
-    router.push('/system')
+    router.push('/system2')
   }
 }
 </script>

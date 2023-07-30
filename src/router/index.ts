@@ -16,19 +16,19 @@ const router = createRouter({
           component: HomeView
         },
         {
-          path: '/home',
+          path: '/system1',
           component: HomeView
         },
         {
-          path: '/system',
+          path: '/system2',
           component: SystemView
         }
       ]
     },
-    // {
-    //   path: '/home',
-    //   component: HomeView
-    // },
+    {
+      path: '/home',
+      component: HomeView
+    },
     {
       path: '/history',
       component: HistoryView
