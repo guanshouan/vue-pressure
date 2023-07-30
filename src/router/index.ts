@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import BipapSystem from '../views/BipapSystem.vue'
 import HistoryView from '../views/HistoryView.vue'
 import LayoutView from '../views/LayoutView.vue'
-import SystemView from '../views/SystemView.vue'
+import CpapSystem from '../views/CpapSystem.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,21 +13,21 @@ const router = createRouter({
       children: [
         {
           path: '',
-          component: HomeView
+          component: CpapSystem
         },
         {
-          path: '/system1',
-          component: HomeView
+          path: '/CPAP',
+          component: CpapSystem
         },
         {
-          path: '/system2',
-          component: SystemView
+          path: '/BIPAP',
+          component: BipapSystem
         }
       ]
     },
     {
       path: '/home',
-      component: HomeView
+      component: BipapSystem
     },
     {
       path: '/history',

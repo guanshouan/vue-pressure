@@ -67,6 +67,10 @@ body {
   margin-right: 8px;
 }
 
+.split-line {
+  border-top: 1px solid rgba(60, 60, 60, 0.12);
+}
+
 .chart-box {
   width: 80%;
   height: 350px;

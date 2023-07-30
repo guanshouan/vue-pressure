@@ -20,24 +20,19 @@ import { useRouter } from 'vue-router'
 let router = useRouter()
 const items = ref([
   {
-    key: '1',
-    label: '双水平动态压力计算系统'
+    key: 'CPAP',
+    label: 'CPAP模式动态压力计算系统'
   },
   {
-    key: '2',
-    label: 'Navigation One'
+    key: 'BIPAP',
+    label: '双水平动态压力计算系统'
   }
 ])
 
-const selectedKeys = ref(['1'])
+const selectedKeys = ref(['CPAP'])
 
 function handleClick({ key }: any) {
-  if (key === '1') {
-    router.push('/system1')
-  }
-  if (key === '2') {
-    router.push('/system2')
-  }
+  router.push(key)
 }
 </script>
 

@@ -497,10 +497,6 @@ function checkParam() {
   }
 }
 
-.split-line {
-  border-top: 1px solid rgba(60, 60, 60, 0.12);
-}
-
 .export-icon {
   cursor: pointer;
   position: fixed;
