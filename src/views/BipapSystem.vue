@@ -500,8 +500,9 @@ function checkParam() {
 .export-icon {
   cursor: pointer;
   position: fixed;
-  top: 28px;
-  right: 26px;
+  // top: 28px;
+  top: 78px;
+  right: 30px;
   font-size: 25px;
   color: #1677ff;
   z-index: 999;
